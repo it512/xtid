@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"strconv"
 	"time"
 )
 
@@ -112,10 +113,6 @@ func (i XTID) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
-func (i XTID) MarshalBinary() ([]byte, error) {
-	return i.Bytes(), nil
-}
-
 func (i *XTID) UnmarshalText(b []byte) error {
 	id, err := Parse(string(b))
 	if err != nil {
@@ -123,6 +120,10 @@ func (i *XTID) UnmarshalText(b []byte) error {
 	}
 	*i = id
 	return nil
+}
+
+func (i XTID) MarshalBinary() ([]byte, error) {
+	return i.Bytes(), nil
 }
 
 func (i *XTID) UnmarshalBinary(b []byte) error {
@@ -148,24 +149,22 @@ func (i *XTID) scan(b []byte) error {
 	}
 }
 
-/*
+// MarshalGQL implements the graphql.Marshaler interface
+func (i XTID) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(i.String()))
+}
+
 // UnmarshalGQL implements the graphql.UnMarshaler interface
 func (i *XTID) UnmarshalGQL(v any) error {
 	return i.Scan(v)
 }
 
-// MarshalGQL implements the graphql.Marshaler interface
-func (i XTID) MarshalGQL(w io.Writer) {
-	io.WriteString(w, strconv.Quote(i.String()))
+func (i XTID) MarshalJSON() ([]byte, error) {
+	return i.MarshalText()
 }
-*/
 
 func (i *XTID) UnmarshalJSON(v []byte) error {
 	return i.scan(v)
-}
-
-func (i XTID) MarshalJSON() ([]byte, error) {
-	return i.MarshalText()
 }
 
 // Value converts the XTID into a SQL driver value which can be used to
